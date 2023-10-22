@@ -51,7 +51,8 @@
 
 
 
-int motionSensorLastValue = 0;
+int _motionSensorLastValue = 0;
+int _powerUpWaitTimeBeforeDoingAnything = 10;
 
 void setup()
 {
@@ -72,6 +73,9 @@ void setup()
     // OUTPUT #2
     pinMode(D1, OUTPUT);    // GPIO5 relay output to "press" the left mouse button
     digitalWrite(D1, LOW);  // switch off relay
+
+    PowerUpGreeting();
+    _powerUpWaitTimeBeforeDoingAnything = 10;
 }
 
 // the loop function runs over and over again forever
@@ -82,12 +86,19 @@ void loop()
 
     printf("motion sensor: %s    dashboard power is: %s\n", motionSensor ? "ON" : "off", powerIsOn ? "ON" : "off");
 
-    if (MotionSensorGoesOn())
+    if (_powerUpWaitTimeBeforeDoingAnything > 0)
     {
-       if (powerIsOn)
-           ReEnableScreen();
-       else
-           SwitchOnComputer();
+        _powerUpWaitTimeBeforeDoingAnything--;
+    }
+    else
+    {
+        if (MotionSensorGoesOn())
+        {
+            if (powerIsOn)
+                ReEnableScreen();
+            else
+                SwitchOnComputer();
+        }
     }
 
     FlashInternalLed();
@@ -97,8 +108,8 @@ void loop()
 int MotionSensorGoesOn()
 {
     int motionSensor = digitalRead(D2);
-    int on = (motionSensor == 1 && motionSensorLastValue == 0); // detect the positive edge of the signal.
-    motionSensorLastValue = motionSensor;
+    int on = (motionSensor == 1 && _motionSensorLastValue == 0); // detect the positive edge of the signal.
+    _motionSensorLastValue = motionSensor;
     return on;
 }
 
@@ -131,23 +142,22 @@ void ReEnableScreen()
     // When the motion sensor goes on, press the left mouse button short two times 
     // the second time to remove the lock screen on some computers
     PressLeftMouseButton();
-    delay(1000);
+    delay(3000);
     PressLeftMouseButton();
-    delay(1000);
 }
 
 void SwitchOnComputer()
 {
-    printf("Dashboard is off, switching on by power button ");
+    printf("Dashboard is off, switching on by power button\n");
     for (int i = 0; i < 2; i++)
     {
-        printf("pressing...");
+        printf("pressing...\n");
         pinMode(D5, OUTPUT);                // "press" dashboard power button (pull low)
         digitalWrite(D5, LOW);              // output low
         digitalWrite(LED_BUILTIN, LOW);     // turn the LED on by making the voltage LOW
         delay(2000);
 
-        printf("releasing...");
+        printf("releasing...\n");
         pinMode(D5, INPUT);                 // "press" dashboard power button (pull low)
         digitalWrite(D5, HIGH);             // pullup on
         digitalWrite(LED_BUILTIN, HIGH);    // turn the LED off (HIGH is the voltage level)
@@ -164,6 +174,15 @@ void PressLeftMouseButton()
     delay(200);
     digitalWrite(LED_BUILTIN, HIGH);
     digitalWrite(D1, LOW);
+}
+
+void PowerUpGreeting()
+{
+    for (int i = 0; i < 20; i++)
+    {
+        FlashInternalLed();
+        delay(100);
+    }
 }
 
 void FlashInternalLed()
