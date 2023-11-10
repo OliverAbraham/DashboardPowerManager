@@ -1,5 +1,7 @@
 # Dashboard power manager
 
+![](https://img.shields.io/github/license/oliverabraham/dashboardpowermanager) ![](https://img.shields.io/github/languages/count/oliverabraham/dashboardpowermanager) ![GitHub Repo stars](https://img.shields.io/github/stars/oliverabraham/dashboardpowermanager?label=repo%20stars) ![GitHub Repo stars](https://img.shields.io/github/stars/oliverabraham?label=user%20stars)
+
 ## OVERVIEW
 
 Controls a tablet or raspi based dashboard for home automation or monitoring. Add a motion detector to your computer to save energy, switch it on only when somebody's around.
