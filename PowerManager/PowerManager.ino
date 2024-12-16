@@ -244,9 +244,10 @@ void PressLeftMouseButton()
 
 void PowerUpGreeting()
 {
-    printf("\n\n\n\n\n\n\n--------------------------------------------------------------\n");
-    printf("Dashboard power manager - mail@oliver-abraham.de\n");
-    printf("--------------------------------------------------------------\n\n\n\n");
+    printf("\n\n\n\n\n\n\n");
+    printf("--------------------------------------------------------------\n");
+    printf("Dashboard power manager - mail@oliver-abraham.de - Version\n");
+    printf("--------------------------------------------------------------\n");
 
     for (int i = 0; i < 20; i++)
     {
