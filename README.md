@@ -13,104 +13,113 @@ Licensed under Apache licence.
 https://www.apache.org/licenses/LICENSE-2.0
 
 
-## Compatibility
-
-This is source code for ESP8266 based microcontrollers, e.g. Wemos D1 mini or similiar.
-
-
 ## DESCRIPTION
 
-This program for a Wemos D1 mini or similiar ESP8266 controls an info display. 
+This program for a Wemos D1 mini or similiar ESP8266 controls an info display / dashboard.
 The purpose is to have a motion sensor attached and wake up the computer or screen saver when motion is detected.
+When I'm not in the office, I want the display to be completely off, in power saving.
+My program will detect the motion signal and then either switch on the dashboard (of it's off) or press the mouse button to disable the screesaver.
 
-### Setup
-I have a tablet computer (I call it display) with "normal" power saving settings: 
-Screensaver after some minutes, and go to hibernation after a longer time, i.e. one hour.
-I tore out the board out of a cheap computer mouse and attached it to the display. 
-Pressing the left mouse button reactivates the display, as long as the display is under power.
-I added a relay to my Wemos D1 that connects to the left mouse button. 
-This is a simple and cheap method to wake up any computer with a microcontroller and doesn't require USB logic.
-Of couse this doesn't work for every display in power off state, because you cannot wake every system by a mouse click.
-For this type I've atached a second line to the power button of the display. In my case this line only needs to be pulled low to switch it on.
-If needed you can put a relay in between.
-The program decides which method to use. "press" the power button or the mouse button.
 
-### Connections
-So, the controller has two inputs and two outputs:
-- Input 1: signals motion, connect a standard 5 volt IR motion detector to it
-- Input 2: signals the power state of the display.
-- Output 1: used to switch on the tables. Connect this to the power button or drive a relay and add the contact to the power button
-- Output 2: used to "press" the left mouse button, to disable the screen saver and bring back the display.
+## OPERATION
 
+The power manager board has two inputs and two outputs.
+Inputs are connected to:
+  1. a typical IR motion sensor, i.e. Aliexpress SR501 or the smaller AM312.
+     If you like a black one, you could also take the D302S.
+  2. a "power on" signal to detect if the tablet is powered on.
+
+Outputs are connected to:
+  1. the first relay, used to "simulate" a mouse click
+  2. the second relay, to "simulate" the power button press
+
+
+## MATERIAL
+
+You need:
+- A tablet computer
+- a Wemos D1 mini or similiar board.
+- a random USB mouse
+- two relays
+- two NPN transistors, BC547B or similiar to drive the relays. 
+- two 10k resistors and two diodes, 1N4148 or similiar.
+
+
+## SETUP
+
+  1. I took a cheap tablet computer set set up these power saving settings:
+     Blank screen screensaver after 5 minutes, and going into hibernation after 30 or 60 minutes.
+
+  2. Connect the motion sensor output to D2 (GPIO4) of the Wemos D1.
+
+  3. Connect the mouse and verify that pressing a button will wake up the screensaver.
+     Now disassemble the mouse, inspect the switch below the mouse button and locate the two pins.
+     Connect the mouse again to your dashboard and verify you've got the right pins by bridging them 
+     on the bottom side with a cable or screwdriver.
+     You should see the mouse click on the screen. And when in screensaving, the display should light up now.
+     Connect the output of the first relay to the button pins.
+     Connect Wemos Pin D1 (GPIO5) to the input of the relay.
+     I know this isn't an academic solution, but simple and cheap method to wake up any computer 
+     with a microcontroller and doesn't require USB logic.
+     If your middle mouse button also wakes the screensaver, use this button, because it's doesn't 
+     disturb you when you operate the dashboard and mouse click comes in between.
+
+If you're able to configure the dashboard that it wakes up from power saving after a mouse click, you're done.
+If not:
+
+  4. You now need to find a "power on" signal at or in your dashboard.
+     Often the USB sockets have power even in the power off state, so this isn't usable.
+     You might draw the power signal from the mouse itself, the infrared diode in the mouse might also be off in off state.
+     Otherwise you'll need to open the tablet carefully and find a signal, maybe you'll find the power LED 
+     or the display backlight power signal. You'll need a signal of 3,3V. 
+     If it's higher, you need to put a voltage divider in between (only two resistors).
+     Before connecting this to you Wemos, measure the voltage.
+     Connect this signal to D6 (GPIO12) of the Wemos D1.
+
+  5. Finally you need to find the two connections of the dashboards' power switch.
+     Connect the output of the second relay to them.
+     Connect Wemos Pin D5 (GPIO14) to the input of the relay.
+     In my case, it was enough to pull one of the power switch pins to ground to switch it on.
+     If you have a similiar device, you don't need the second relay and can connect the D5 pin directly to the
+     power switch. But make sure you don't make a mistake here, because you could brick your Wemos D1.
+     If you connect a relay to drive the power switch, set the constant "PowerSwitchOutputActiveHigh" to true.
+
+
+## CONNECTIONS
+
+So, the controller has two inputs and two outputs :
+-Input D2: signals motion, connect a standard Aliexpress 5 volt IR motion detector to it
+-Input D6: signals the power state of the display.
+-Output D5 : used to switch on the tablet. Connect this to the power button or drive a relay and add the contact to the power button
+-Output D1 : used to "press" the left mouse button, to disable the screen saverand bring back the display.
 
 
 ## INSTALLATION
 
-Compile and burn the ino file to your ESP/Wemos board. Connect the four lines to your display/tablet computer.
+Compile and burn the ino file to your Wemos D1 board.
+Don't forget to connect the ground between the Wemos and your dashboard.
+Inspect the program in the serial monitor of your Arduino IDE.
+When the motion detector goes "on" (high), you should see "motion detector on" in serial monitor.
+Switch your dashboard on and off. You should see "dashboard power" changing in serial monitor.
+After motion detection, the program will tell you he's clicking the mouse button. You should hear your first relay.
+Same for the the situation when the dashboard is off and motion is detected, you should hear your second relay.
 
 
+## ADD ON
 
-## ATTACHING TO THE DISPLAY
-
-### Driving the mouse button
-You need to connect a relay to your Wemos. The relay contact needs to be connected parallel to the left button switch in your mouse.
-Buy a cheap mouse and drag out the logic board. You will easily locate the mouse button. You only need to try out which two of the three switch pins to use.
-
-If the left mouse click interferes with your display software, you can switch over to the middle mouse button, which often has no negative effects.
-A critical step is connecting your Wemos to the power button and find a good source inside your tablet for the power indicator.
-
-### Getting access to the power switch
-Opening a tablet computer might be something you don't wanna do, because it requires experience and the knowledge to find the power button 
-connectors on the board. You might brick your tablet if you are new. In this case you might forget about this and set your energy settings to not go into hibernation, 
-only use the screen saver part. In this case you might connect your motion sensor to a relay that directly drives the mouse button switch.
-So you can forget about my program :-)
-
-I used the following method:
-I opened the tablet back side carefully, located the battery and pulled out the cable from the battery. 
-Then I knew the system has no power and I was able to safely disassemble the logic board. 
-The unit only had one board. On the bottom side I soldered one cable to one pin of the power switch (I measured the second pin was connected to 
-ground). 
-If you are in doubt, just connect two cables to both pins of the power switch and connect them to a relay switch. 
-So, use a relay between the wemos and the tablet to "push" the power switch. This is a safe method.
-
-### Getting the power state
-When I had the tablet opened but not yet disassembled, I made some tries and measured pins one some switches to get a power signal when
-the table is under power and no signal when it's off. I found a pin on the sound volume switch that has 1.7 volts when on.
-Another possibility is to locate the micro SD slot that you'll find on most of the models. Google for "micro sd connector pinout"
-and locate the VDD or VCC pin on your board. This will have most likely a stable power-on signal.
-Another possibility is to put a cable to the power LED or charge LED. In my case the charge LED only lights up when the tablet is off,
-so i could also use this and invert the logic in the ino file.
-
-### Powering the Wemos
-Logically the Wemos has to be under power permanently. I took the following solution:
-Because the tablet is always connecting to the charger, I cut the charger cable and grabbed the power lines.
-Sometimes it's a two-pin cable with 19 volts, in my case it's a 5 volts USB cable with a micro USB connector.
-In any case I'm attaching a simple step down voltage regulator from Aliexpress that delivers a 3.3 volt output.
-I have used the "DC-DC Buck Converter Step Down Modul LM2596", which is robust and adjustable. It doesn't care about the input voltage
-and costs under a dollar.
-Example: https://de.aliexpress.com/item/1005005911907067.html
-This feeds the Wemos.
-
-### The motion sensor
-I use the "AM312" round 5V IR motion sensor from aliexpress: https://de.aliexpress.com/item/1005006057413375.html
-You could also use the HC-SR501: https://de.aliexpress.com/item/1874954952.html
-The output pin can be connected directly to the Wemos input.
-
+The power manager tries to connect to your WIFI, to reach a network time server, to get the current time.
+You can configure the time period where the power manager will not react to motion. My default is from 23:00 to 08:00.
 
 
 ## AUTHOR
 
-Oliver Abraham, mail@oliver-abraham.de, https://www.oliver-abraham.de
-
+Oliver Abraham, mail@oliver - abraham.de, https://www.oliver-abraham.de
 Please feel free to comment and suggest improvements!
-
 
 
 ## SOURCE CODE
 
-The source code is hosted at:
-
-https://github.com/OliverAbraham/DashboardPowerManager
+The source code is hosted at https://github.com/OliverAbraham/DashboardPowerManager
 
 
 # MAKE A DONATION !
